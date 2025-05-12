@@ -16,21 +16,9 @@ UniformWeibullSite = xrsite.UniformWeibullSite
 # === Filepaths ===
 current_directory = os.path.dirname(os.path.abspath(__file__))
 filepaths = [
-    ("Vineyard Wind", 
-     os.path.join(current_directory, 'data', 'Vineyard_Wind_boundary.geojson'),
-     os.path.join(current_directory, 'data', 'Vineyard_Wind_line_offshore.geojson')),
-
-    ("Coastal Virginia Offshore Wind", 
-     os.path.join(current_directory, 'data', 'Coastal_Virginia_Offshore_Wind_boundary.geojson'),
-     os.path.join(current_directory, 'data', 'Coastal_Virginia_Offshore_Wind_line_offshore.geojson')),
-
     ("Revolution SouthFork Wind", 
      os.path.join(current_directory, 'data', 'Revolution_SouthFork_Wind_Boundary.geojson'),
      os.path.join(current_directory, 'data', 'Revolution_SouthFork_Wind_line_offshore.geojson')),
-
-    ("Vesterhav Nord and Syd", 
-     os.path.join(current_directory, 'data', 'Vesterhav_Nord_and_Syd_boundary.geojson'),
-     os.path.join(current_directory, 'data', 'Vesterhav_Nord_and_Syd_line_offshore.geojson')),
 ]
 
 def convert_LatLong_to_utm(long, lat):
