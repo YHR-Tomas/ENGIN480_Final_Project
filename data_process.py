@@ -5,7 +5,6 @@ import pyproj
 import os
 import numpy as np
 import geojson
-
 from py_wake.examples.data.hornsrev1 import V80
 from py_wake import NOJ
 from py_wake.literature.gaussian_models import Bastankhah_PorteAgel_2014, Zong_PorteAgel_2020, Niayifar_PorteAgel_2016
@@ -17,8 +16,17 @@ UniformWeibullSite = xrsite.UniformWeibullSite
 current_directory = os.path.dirname(os.path.abspath(__file__))
 filepaths = [
     ("Revolution SouthFork Wind", 
-     os.path.join(current_directory, 'data', 'Revolution_SouthFork_Wind_Boundary.geojson'),
-     os.path.join(current_directory, 'data', 'Revolution_SouthFork_Wind_line_offshore.geojson')),
+     os.path.join(current_directory, 'Layouts', 'Revolutionwind_southforkwind.geojson'),
+     os.path.join(current_directory, 'Layouts', 'Revolutionwind_southforkwind_TBL.geojson')),
+    ("Vineyard Wind",
+     os.path.join(current_directory, 'Layouts', 'vineyardwind.geojson'),
+     os.path.join(current_directory, 'Layouts', 'vineyardwind_TBL.geojson')),
+    ("Coastal Virginia",
+     os.path.join(current_directory, 'Layouts', 'coastal_virginia.geojson'),
+     os.path.join(current_directory, 'Layouts', 'coastal_virginia_TBL.geojson')),
+    ("Fecamp",
+     os.path.join(current_directory, 'Layouts', 'Fecamp.geojson'),
+     os.path.join(current_directory, 'Layouts', 'Fecamp_TBL.geojson')),
 ]
 
 def convert_LatLong_to_utm(long, lat):
@@ -52,7 +60,7 @@ def plot_bound_on_ax(ax, title, boundary_path, offshore_path):
     ax.grid(True)
     return wt_x, wt_y
 
-fig, axs = plt.subplots(2, 2, figsize=(14, 10))
+fig, axs = plt.subplots(2, 2, figsize=(10, 7))
 axs = axs.flatten()
 layout_by_farm = {}
 
@@ -65,9 +73,16 @@ plt.show()
 
 # === Wind Profile Extraction ===
 lib_filenames = {
+<<<<<<< HEAD:Project5_data_proces.py
     "Revolution SouthFork Wind": "Revolution_SouthFork_Wind_wind_spped.lib"
+=======
+    "Vineyard Wind": "vineyardwind_gwa3_gwc_customarea.lib",
+    "Coastal Virginia": "coastalvirginia_gwa3_gwc_customarea.lib",
+    "Revolution SouthFork Wind": "revolutionwind_gwa3_gwc_customarea.lib",
+    "Fecamp": "fecamp_gwa3_gwc_customarea.lib"
+>>>>>>> 2893e108979051947dcba9e375056f3625df43eb:data_process.py
 }
-lib_paths = {name: os.path.join(current_directory, 'data', filename) for name, filename in lib_filenames.items()}
+lib_paths = {name: os.path.join(current_directory, 'gwc', filename) for name, filename in lib_filenames.items()}
 
 def extract_f_a_k(filepath):
     with open(filepath, 'r') as file:
