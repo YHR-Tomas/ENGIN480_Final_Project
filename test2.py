@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from py_wake.examples.data.dtu10mw._dtu10mw import DTU10MW
+from sg11mw200dd import SG11MW200DD
 from py_wake.utils.plotting import setup_plot
 import dynamiks.utils
 print(dir(dynamiks.utils))
@@ -19,11 +20,11 @@ import numpy as np
 import geojson
 import geopandas as gpd
 
-U = 10   # wind speed in m/s
+U = 22.5   # wind speed in m/s
 TI = 0.1 # turbulence intensity (10%)
 
 
-wt = DTU10MW()
+wt = SG11MW200DD()
 wfm = PropagateDownwind(UniformSite(ws=U, ti=TI), wt, NiayifarGaussianDeficit(),
                         deflectionModel=GCLHillDeflection(),
                         turbulenceModel=CrespoHernandez(),
@@ -40,7 +41,7 @@ wt_y = np.array([4549465.08, 4551316.05, 4553165.91, 4553188.73, 4553154.72, 455
                  4549485.14, 4549453.15, 4549461.59, 4551337.22, 4553042.26, 4551307.78, 4549535.70])
 
 
-wd_lst = np.arange(165, 265,2)
+wd_lst = np.arange(195, 225,2)
 #yaw = np.ones((3, len(wd_lst))) # one deg misalignment as initial guess to get out of local minimum at 0deg
 
 yaw = np.ones((13, len(wd_lst)))  # Now 12 turbines
@@ -53,14 +54,6 @@ def daep(yaw):
 
 def plot(yaw,wd):
     wfm(wt_x, wt_y, yaw=yaw, tilt=0, wd=wd).flow_map().plot_wake_map()
-    
-
-import topfarm
-import subprocess
-import sys
-import wetb
-
-
     
 from topfarm._topfarm import TopFarmProblem
 from topfarm.cost_models.cost_model_wrappers import AEPCostModelComponent
@@ -77,27 +70,6 @@ yaw_tabular = np.round(yaw_tabular).astype(int)
 print(yaw_tabular)
 
 print(str(yaw_tabular.tolist()).replace(" ",""))
-
-"""
-yaw_tabular=np.array([[0,0,0,0,0,0,-1,-2,-4,-6,-8,-11,-15,-18,-22,25,22,18,15,11,8,6,4,2,1,0,0,0,0,0,0],
-                      [0,0,0,0,0,0,-1,-2,-4,-6,-8,-11,-14,-17,-20,24,20,17,14,11,8,6,4,2,1,0,0,0,0,0,0],
-                      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]])
-
-yaw_tabular = np.array([
-    [0]*31,  # Turbine 0
-    [0]*31,  # Turbine 1
-    [0]*31,  # Turbine 2
-    [0]*31,  # Turbine 3
-    [0]*31,  # Turbine 4
-    [0]*31,  # Turbine 5
-    [0]*31,  # Turbine 6
-    [0]*31,  # Turbine 7
-    [0]*31,  # Turbine 8
-    [0]*31,  # Turbine 9
-    [0]*31,  # Turbine 10
-    [0]*31   # Turbine 11
-])
-"""
 
 yaw_tabular = np.array([
     np.round(10 * np.sin(np.linspace(0, 2*np.pi, len(wd_lst))))  # pattern example
@@ -121,14 +93,14 @@ def simple_wind_farm_controller(flowSimulation):
     flowSimulation.windTurbines.yaw = yaw
     
 def wind_direction_changer(flowSimulation):
-    flowSimulation.wind_direction = 260+flowSimulation.time/100
+    flowSimulation.wind_direction = 210+flowSimulation.time/100
     
 from dynamiks.utils.test_utils import DefaultDWMFlowSimulation, DemoSite
 from dynamiks.dwm.particle_motion_models import HillVortexParticleMotion
 from dynamiks.wind_turbines.pywake_windturbines import PyWakeWindTurbines
 from dynamiks.views import XYView, EastNorthView, MultiView
 
-wts = PyWakeWindTurbines(x=wt_x, y=wt_y, windTurbine=DTU10MW())
+wts = PyWakeWindTurbines(x=wt_x, y=wt_y, windTurbine=SG11MW200DD())
 fs = DefaultDWMFlowSimulation(windTurbines=wts, particleMotionModel=HillVortexParticleMotion(),
                           d_particle=.1, n_particles=100, ti=TI, ws=U,
                           step_handlers=[wind_direction_changer, simple_wind_farm_controller])
@@ -137,70 +109,28 @@ fs.visualize(2000, dt=10, interval=.1, view=EastNorthView(
     x=np.linspace(wt_x.min() - 500, wt_x.max() + 500, 500), y=np.linspace(wt_y.min() - 500, wt_y.max() + 500, 500),
     visualizers=[lambda fs: plt.title(f'Time: {fs.time}s, wind direction: {fs.wind_direction}deg')]), id='WindFarmControlSimple')
 
-print('done')
-"""
-import matplotlib
-matplotlib.use('Agg')  # Use a non-GUI backend to avoid crashes
-import matplotlib.pyplot as plt
-import numpy as np
-import os
-from dynamiks.views import EastNorthView
+fs.run(2000, verbose=1)
+power_yaw_control = wts.sensors.to_xarray(dataset=True).power
 
-# Prepare output folder
-os.makedirs("frames", exist_ok=True)
+wts = PyWakeWindTurbines(x=wt_x, y=wt_y, windTurbine=SG11MW200DD())
+fs_baseline = DefaultDWMFlowSimulation(windTurbines=wts, particleMotionModel=HillVortexParticleMotion(),
+                          d_particle=.1, n_particles=100, ti=TI, ws=U,
+                          step_handlers=[wind_direction_changer])
+fs_baseline.run(2000, verbose=1)
 
-from dynamiks.visualizers import VelocityFieldVisualizer, ParticlesVisualizer, WindTurbineVisualizer
+power_baseline = wts.sensors.to_xarray(dataset=True).power
 
-from dynamiks.views import EastNorthView
-import numpy as np
-import matplotlib.pyplot as plt
+axes = plt.subplots(4,1, figsize=(8,12), sharex=True)[1]
+for wt, ax in zip(power_yaw_control.wt, axes):
+    for p,n in [(power_baseline,'Baseline'),(power_yaw_control,'Yaw control')]:
+        p = p.sel(wt=wt)/1e6
+        p.plot(ax=ax, label=f'{n} (mean: {p.mean().item():.1f}MW)')
+    setup_plot(ax=ax,ylabel='Power [MW]')
+    ax.legend(loc=1)
+for p,n in [(power_baseline,'Baseline'),(power_yaw_control,'Yaw control')]:
+    p = p.sum('wt')/1e6
+    p.plot(ax=axes[3], label=f'{n} (mean: {p.mean().item():.1f}MW)')
+setup_plot(ax=axes[3],ylabel='Power [MW]', title='Wind farm total')
+axes[3].legend(loc=1)
 
-view = EastNorthView(
-    x=np.linspace(-200, 2000, 500),
-    y=np.linspace(-400, 400),
-    visualizers=[
-        VelocityFieldVisualizer(),
-        ParticlesVisualizer(),
-        WindTurbineVisualizer(),
-        lambda fs: plt.title(f"Time: {fs.time:.1f}s, wind direction: {fs.wind_direction:.1f}°")
-    ]
-)
-
-
-# Loop to render each frame
-for i in range(200):  # or 2000 for longer simulation
-    fs.step()
-
-    # Fresh figure and axes for every frame to prevent colorbar recursion
-    fig = plt.figure(figsize=(10, 4))
-    view(fs)  # This handles plotting + colorbar internally
-    plt.savefig(f"frames/frame_{i:04d}.png", dpi=150)
-    plt.close(fig)  # VERY important to avoid memory and recursion errors
-
-import subprocess
-import os
-
-# Define the path to the frames and the output video file
-frames_path = "frames/frame_%04d.png"
-output_video = "wind_farm_simulation.mp4"
-
-# Construct the ffmpeg command
-ffmpeg_command = [
-    "ffmpeg",
-    "-framerate", "10",                 # Set the frame rate (adjust as needed)
-    "-i", frames_path,                  # Input frame pattern
-    "-c:v", "libx264",                  # Video codec
-    "-pix_fmt", "yuv420p",              # Pixel format for compatibility
-    output_video                        # Output video file
-]
-
-# Execute the ffmpeg command
-try:
-    subprocess.run(ffmpeg_command, check=True)
-    print(f"✅ Video saved as '{output_video}'")
-except subprocess.CalledProcessError as e:
-    print("❌ An error occurred while creating the video.")
-    print(e)
-"""
-
-
+plt.tight_layout()
