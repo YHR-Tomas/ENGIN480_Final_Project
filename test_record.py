@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-#from py_wake.examples.data.dtu10mw._dtu10mw import DTU10MW
+#from py_wake.examples.data.SG11MW200DD._SG11MW200DD import SG11MW200DD
 from sg11mw200dd import SG11MW200DD
 from py_wake.utils.plotting import setup_plot
 import dynamiks.utils
@@ -20,11 +20,11 @@ import numpy as np
 import geojson
 import geopandas as gpd
 
-U = 10   # wind speed in m/s
+U = 22.5   # wind speed in m/s
 TI = 0.1 # turbulence intensity (10%)
 
 
-wt = DTU10MW()
+wt = SG11MW200DD()
 wfm = PropagateDownwind(UniformSite(ws=U, ti=TI), wt, NiayifarGaussianDeficit(),
                         deflectionModel=GCLHillDeflection(),
                         turbulenceModel=CrespoHernandez(),
@@ -49,14 +49,6 @@ def daep(yaw):
 
 def plot(yaw,wd):
     wfm(wt_x, wt_y, yaw=yaw, tilt=0, wd=wd).flow_map().plot_wake_map()
-    
-
-import topfarm
-import subprocess
-import sys
-import wetb
-
-
     
 from topfarm._topfarm import TopFarmProblem
 from topfarm.cost_models.cost_model_wrappers import AEPCostModelComponent
@@ -84,11 +76,12 @@ for i, y_ in enumerate(yaw_tabular):
     plt.plot(wd_lst, y_, label=f'WT {i}')
 setup_plot(xlabel='Wind direction [deg]', ylabel='Yaw misalignment [deg]')
 
+"""
 for wd in [195,225]:
     plt.figure(figsize=(8,2))
     plot(yaw_tabular[:,wd_lst==wd][:,0],wd)
     plt.title(f'{wd} deg')
-    
+ """   
     
 def simple_wind_farm_controller(flowSimulation):
     wd = flowSimulation.wind_direction
@@ -97,14 +90,14 @@ def simple_wind_farm_controller(flowSimulation):
     flowSimulation.windTurbines.yaw = yaw
     
 def wind_direction_changer(flowSimulation):
-    flowSimulation.wind_direction = 260+flowSimulation.time/100
+    flowSimulation.wind_direction = 210+flowSimulation.time/100
     
 from dynamiks.utils.test_utils import DefaultDWMFlowSimulation, DemoSite
 from dynamiks.dwm.particle_motion_models import HillVortexParticleMotion
 from dynamiks.wind_turbines.pywake_windturbines import PyWakeWindTurbines
 from dynamiks.views import XYView, EastNorthView, MultiView
 
-wts = PyWakeWindTurbines(x=wt_x, y=wt_y, windTurbine=DTU10MW())
+wts = PyWakeWindTurbines(x=wt_x, y=wt_y, windTurbine=SG11MW200DD())
 fs = DefaultDWMFlowSimulation(windTurbines=wts, particleMotionModel=HillVortexParticleMotion(),
                           d_particle=.1, n_particles=100, ti=TI, ws=U,
                           step_handlers=[wind_direction_changer, simple_wind_farm_controller])
@@ -129,14 +122,17 @@ view = EastNorthView(
     ]
 )
 
-def update_plot(i):
-    fs.step()  # advance one timestep
-    ax.clear()  # still needed to reset the figure
-    view(fs)  # let EastNorthView handle plotting internally
+import gc
 
-ani = animation.FuncAnimation(fig, update_plot, frames=2000, interval=100)
+def update_plot(i):
+    fs.step()
+    view(fs)
+    gc.collect()
+
+ani = animation.FuncAnimation(fig, update_plot, frames=2000, interval=100, blit=False)
+
 
 writer = FFMpegWriter(fps=10, metadata=dict(artist='DYNAMIKS User'), bitrate=1800)
-ani.save("Revolution_SouthFork_Wind_simulation.mp4", writer=writer, dpi=200)
+ani.save("Revolution_SouthFork_Wind_simulation_1.mp4", writer=writer, dpi=200)
 
 print('done')
