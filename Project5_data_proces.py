@@ -65,10 +65,7 @@ plt.show()
 
 # === Wind Profile Extraction ===
 lib_filenames = {
-    "Vineyard Wind": "Vineyard_Wind_wind_speed.lib",
-    "Coastal Virginia Offshore Wind": "Coastal_Virginia_Offshore_Wind_wind_speed.lib",
-    "Revolution SouthFork Wind": "Revolution_SouthFork_Wind_wind_spped.lib",
-    "Vesterhav Nord and Syd": "Vesterhav_Nord_and_Syd_wind_speed.lib"
+    "Revolution SouthFork Wind": "Revolution_SouthFork_Wind_wind_spped.lib"
 }
 lib_paths = {name: os.path.join(current_directory, 'data', filename) for name, filename in lib_filenames.items()}
 
@@ -120,7 +117,9 @@ for name, _, _ in filepaths:
     print(site.ds['Sector_frequency'].isel(wd=3))
 
     _ = site.plot_wd_distribution(ws_bins=[0,5,10,15,20,25])
-
+    
+print("done")
+"""
     sim_noj = NOJ(site, wind_turbines)
     sim_bast = Bastankhah_PorteAgel_2014(site, wind_turbines, k=0.032)
     sim_zong = Zong_PorteAgel_2020(site, wind_turbines)
@@ -153,3 +152,4 @@ for farm_name, result in results_by_farm.items():
     plt.show()
 
 print("done")
+"""

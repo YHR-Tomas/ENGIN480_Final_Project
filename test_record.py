@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from py_wake.examples.data.dtu10mw._dtu10mw import DTU10MW
+#from py_wake.examples.data.dtu10mw._dtu10mw import DTU10MW
+from sg11mw200dd import SG11MW200DD
 from py_wake.utils.plotting import setup_plot
 import dynamiks.utils
 print(dir(dynamiks.utils))
