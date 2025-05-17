@@ -20,7 +20,7 @@ import numpy as np
 import geojson
 import geopandas as gpd
 
-U = 22.5   # wind speed in m/s
+U = 10   # wind speed in m/s
 TI = 0.1 # turbulence intensity (10%)
 
 
@@ -36,10 +36,10 @@ wt_y = np.array([4549465.08, 4551316.05, 4553165.91, 4553188.73, 4553154.72, 455
                  4549485.14, 4549453.15, 4549461.59, 4551337.22, 4553042.26, 4551307.78, 4549535.70])
 
 
-wd_lst = np.arange(165, 265,2)
+wd_lst = np.arange(195, 225,2)
 #yaw = np.ones((3, len(wd_lst))) # one deg misalignment as initial guess to get out of local minimum at 0deg
 
-yaw = np.ones((13, len(wd_lst)))  # Now 12 turbines
+yaw = np.ones((13, len(wd_lst)))  
 
 def aep(yaw):
     return wfm.aep(wt_x, wt_y, yaw=yaw.reshape((13, len(wd_lst))), tilt=0, wd=wd_lst)
@@ -66,17 +66,18 @@ print(yaw_tabular)
 
 print(str(yaw_tabular.tolist()).replace(" ",""))
 
-
+"""
 yaw_tabular = np.array([
-    np.round(10 * np.sin(np.linspace(0, 2*np.pi, len(wd_lst))))  # pattern example
+    np.round(10 * np.sin(np.linspace(0, 2*np.pi, len(wd_lst))))  
     for _ in range(13)
 ], dtype=int)
+
 
 for i, y_ in enumerate(yaw_tabular):
     plt.plot(wd_lst, y_, label=f'WT {i}')
 setup_plot(xlabel='Wind direction [deg]', ylabel='Yaw misalignment [deg]')
 
-"""
+
 for wd in [195,225]:
     plt.figure(figsize=(8,2))
     plot(yaw_tabular[:,wd_lst==wd][:,0],wd)
@@ -90,7 +91,7 @@ def simple_wind_farm_controller(flowSimulation):
     flowSimulation.windTurbines.yaw = yaw
     
 def wind_direction_changer(flowSimulation):
-    flowSimulation.wind_direction = 210+flowSimulation.time/100
+    flowSimulation.wind_direction = 200+flowSimulation.time/100
     
 from dynamiks.utils.test_utils import DefaultDWMFlowSimulation, DemoSite
 from dynamiks.dwm.particle_motion_models import HillVortexParticleMotion
@@ -114,13 +115,18 @@ from matplotlib.animation import FFMpegWriter
 fig, ax = plt.subplots(figsize=(10, 4))
 
 # Prepare a view (same as used in fs.visualize)
-view = EastNorthView(
-    x=np.linspace(wt_x.min() - 500, wt_x.max() + 500, 500),
-    y=np.linspace(wt_y.min() - 500, wt_y.max() + 500, 500),
+"""
+view = EastNorthView( 
+    x=np.linspace(wt_x.min() - 4000, wt_x.max() + 4000, 2000),
+    y=np.linspace(wt_y.min() - 4000, wt_y.max() + 4000, 2000),
     visualizers=[
         lambda fs: plt.title(f"Time: {fs.time:.1f}s, wind direction: {fs.wind_direction:.1f}°")
     ]
 )
+"""
+view=EastNorthView( 
+    x=np.linspace(wt_x.min() - 4000, wt_x.max() + 4000, 2000), y=np.linspace(wt_y.min() - 4000, wt_y.max() + 4000, 2000),
+    visualizers=[lambda fs: plt.title(f'Time: {fs.time}s, wind direction: {fs.wind_direction}deg')])
 
 import gc
 
@@ -133,6 +139,6 @@ ani = animation.FuncAnimation(fig, update_plot, frames=2000, interval=100, blit=
 
 
 writer = FFMpegWriter(fps=10, metadata=dict(artist='DYNAMIKS User'), bitrate=1800)
-ani.save("Revolution_SouthFork_Wind_simulation_1.mp4", writer=writer, dpi=200)
+ani.save("Revolution_SouthFork_Wind_simulation_3.mp4", writer=writer, dpi=200)
 
 print('done')

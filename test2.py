@@ -20,7 +20,7 @@ import numpy as np
 import geojson
 import geopandas as gpd
 
-U = 22.5   # wind speed in m/s
+U = 10   # wind speed in m/s
 TI = 0.1 # turbulence intensity (10%)
 
 
@@ -72,19 +72,25 @@ print(yaw_tabular)
 print(str(yaw_tabular.tolist()).replace(" ",""))
 
 yaw_tabular = np.array([
-    np.round(10 * np.sin(np.linspace(0, 2*np.pi, len(wd_lst))))  # pattern example
+    np.round(10 * np.sin(np.linspace(0, 2*np.pi, len(wd_lst))))  
     for _ in range(13)
 ], dtype=int)
 
+"""
 for i, y_ in enumerate(yaw_tabular):
     plt.plot(wd_lst, y_, label=f'WT {i}')
 setup_plot(xlabel='Wind direction [deg]', ylabel='Yaw misalignment [deg]')
-
-for wd in [195,225]:
-    plt.figure(figsize=(8,2))
-    plot(yaw_tabular[:,wd_lst==wd][:,0],wd)
-    plt.title(f'{wd} deg')
-    
+   
+  
+for wd in [199, 223]:
+    if wd in wd_lst:
+        wd_index = np.where(wd_lst == wd)[0][0]
+        plt.figure(figsize=(8, 2))
+        plot(yaw_tabular[:, wd_index], wd)
+        plt.title(f'{wd} deg')
+    else:
+        print("Available wind directions:", wd_lst)
+""" 
     
 def simple_wind_farm_controller(flowSimulation):
     wd = flowSimulation.wind_direction
@@ -93,7 +99,7 @@ def simple_wind_farm_controller(flowSimulation):
     flowSimulation.windTurbines.yaw = yaw
     
 def wind_direction_changer(flowSimulation):
-    flowSimulation.wind_direction = 210+flowSimulation.time/100
+    flowSimulation.wind_direction = 200+flowSimulation.time/100
     
 from dynamiks.utils.test_utils import DefaultDWMFlowSimulation, DemoSite
 from dynamiks.dwm.particle_motion_models import HillVortexParticleMotion
@@ -105,8 +111,10 @@ fs = DefaultDWMFlowSimulation(windTurbines=wts, particleMotionModel=HillVortexPa
                           d_particle=.1, n_particles=100, ti=TI, ws=U,
                           step_handlers=[wind_direction_changer, simple_wind_farm_controller])
 
-fs.visualize(2000, dt=10, interval=.1, view=EastNorthView(
-    x=np.linspace(wt_x.min() - 500, wt_x.max() + 500, 500), y=np.linspace(wt_y.min() - 500, wt_y.max() + 500, 500),
+#print("Number of turbines:", len(wt_x)) 
+
+fs.visualize(2000, dt=10, interval=.1, view=EastNorthView( # need to change to EastNorthView to other
+    x=np.linspace(wt_x.min() - 5000, wt_x.max() + 5000, 2000), y=np.linspace(wt_y.min() - 5000, wt_y.max() + 5000, 2000),
     visualizers=[lambda fs: plt.title(f'Time: {fs.time}s, wind direction: {fs.wind_direction}deg')]), id='WindFarmControlSimple')
 
 fs.run(2000, verbose=1)
