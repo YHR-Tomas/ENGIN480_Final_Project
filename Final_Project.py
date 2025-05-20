@@ -71,18 +71,28 @@ print(yaw_tabular)
 
 print(str(yaw_tabular.tolist()).replace(" ",""))
 
-yaw_tabular = np.array([
-    np.round(10 * np.sin(np.linspace(0, 2*np.pi, len(wd_lst))))  
-    for _ in range(13)
-], dtype=int)
 
- 
+yaw_tabular=np.array([[0,0,-1,-2,-3,-2,2,3,2,1,0,-1,-3,-3,-6],
+                      [0,0,0,0,0,0,0,0,0,0,-1,-3,-5,-7,-5],
+                      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                      [0,0,0,0,0,0,0,0,0,0,-1,-3,-5,-3,-1],
+                      [0,0,0,-1,-3,-3,0,3,3,1,0,0,0,-1,-2],
+                      [0,0,0,-1,-2,-3,-2,2,3,2,0,-1,-3,-5,-7],
+                      [1,0,0,0,0,0,0,0,0,0,-1,-2,-4,-6,-7],
+                      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]])
+
+
 for i, y_ in enumerate(yaw_tabular):
     plt.plot(wd_lst, y_, label=f'WT {i}')
 setup_plot(xlabel='Wind direction [deg]', ylabel='Yaw misalignment [deg]')
    
 
-for wd in [199, 223]:
+for wd in [221, 223]:
     if wd in wd_lst:
         wd_index = np.where(wd_lst == wd)[0][0]
         plt.figure(figsize=(8, 2))
@@ -99,7 +109,7 @@ def simple_wind_farm_controller(flowSimulation):
     flowSimulation.windTurbines.yaw = yaw
     
 def wind_direction_changer(flowSimulation):
-    flowSimulation.wind_direction = 210+flowSimulation.time/100
+    flowSimulation.wind_direction = 200+flowSimulation.time/100
     
 from dynamiks.utils.test_utils import DefaultDWMFlowSimulation, DemoSite
 from dynamiks.dwm.particle_motion_models import HillVortexParticleMotion
@@ -113,7 +123,7 @@ fs = DefaultDWMFlowSimulation(windTurbines=wts, particleMotionModel=HillVortexPa
 
 #print("Number of turbines:", len(wt_x)) 
 
-fs.visualize(831, dt=10, interval=.1, view=EastNorthView( # need to change to EastNorthView to other
+fs.visualize(700, dt=10, interval=.1, view=EastNorthView( # need to change to EastNorthView to other
     x=np.linspace(wt_x.min() - 1000, wt_x.max() + 1000, 1000), y=np.linspace(wt_y.min() - 4000, wt_y.max() + 4000, 2000),
     visualizers=[lambda fs: plt.title(f'Time: {fs.time}s, wind direction: {fs.wind_direction}deg')]), id='WindFarmControlSimple')
 
@@ -128,19 +138,39 @@ fs_baseline = DefaultDWMFlowSimulation(windTurbines=wts, particleMotionModel=Hil
 fs_baseline.run(2000, verbose=1)
 
 power_baseline = wts.sensors.to_xarray(dataset=True).power
-
+"""
 axes = plt.subplots(4,1, figsize=(8,12), sharex=True)[1]
+
 for wt, ax in zip(power_yaw_control.wt, axes):
     for p,n in [(power_baseline,'Baseline'),(power_yaw_control,'Yaw control')]:
         p = p.sel(wt=wt)/1e6
         p.plot(ax=ax, label=f'{n} (mean: {p.mean().item():.1f}MW)')
     setup_plot(ax=ax,ylabel='Power [MW]')
     ax.legend(loc=1)
+    
 for p,n in [(power_baseline,'Baseline'),(power_yaw_control,'Yaw control')]:
     p = p.sum('wt')/1e6
     p.plot(ax=axes[3], label=f'{n} (mean: {p.mean().item():.1f}MW)')
 setup_plot(ax=axes[3],ylabel='Power [MW]', title='Wind farm total')
 axes[3].legend(loc=1)
+"""
+
+fig, axes = plt.subplots(14, 1, figsize=(12, 30), sharex=True)
+
+for i, wt in enumerate(power_yaw_control.wt.values):
+    ax = axes[i]
+    for p, n in [(power_baseline, 'Baseline'), (power_yaw_control, 'Yaw control')]:
+        power = p.sel(wt=wt) / 1e6
+        power.plot(ax=ax, label=f'{n} (mean: {power.mean().item():.1f}MW)')
+    setup_plot(ax=ax, ylabel=f'Turbine {wt}\nPower [MW]')
+    ax.legend(loc='upper right')
+
+# Total power output
+for p, n in [(power_baseline, 'Baseline'), (power_yaw_control, 'Yaw control')]:
+    total_power = p.sum('wt') / 1e6
+    total_power.plot(ax=axes[-1], label=f'{n} (mean: {total_power.mean().item():.1f}MW)')
+setup_plot(ax=axes[-1], ylabel='Total Power [MW]', title='Wind Farm Total')
+axes[-1].legend(loc='upper right')
 
 plt.tight_layout()
 

@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-#from py_wake.examples.data.SG11MW200DD._SG11MW200DD import SG11MW200DD
+from py_wake.examples.data.dtu10mw._dtu10mw import DTU10MW
 from sg11mw200dd import SG11MW200DD
 from py_wake.utils.plotting import setup_plot
 import dynamiks.utils
@@ -29,6 +29,11 @@ wfm = PropagateDownwind(UniformSite(ws=U, ti=TI), wt, NiayifarGaussianDeficit(),
                         deflectionModel=GCLHillDeflection(),
                         turbulenceModel=CrespoHernandez(),
                         rotorAvgModel=CGIRotorAvg(21))
+#wt_x = np.arange(3) * 5 * wt.diameter()
+#wt_y = wt_x * 0
+
+#wt_x = [0, 400, 800, 1200, 1600, 2000, 0, 400, 800, 1200, 1600, 2000]
+#wt_y = [0, 0, 0, 0, 0, 0, 400, 400, 400, 400, 400, 400]
 
 wt_x = np.array([316030.33, 316050.11, 316096.62, 317848.16, 319758.56, 317919.63, 
                  317889.61, 319720.91, 321553.09, 321652.26, 321627.03, 323416.21, 323440.36,])
@@ -39,7 +44,7 @@ wt_y = np.array([4549465.08, 4551316.05, 4553165.91, 4553188.73, 4553154.72, 455
 wd_lst = np.arange(195, 225,2)
 #yaw = np.ones((3, len(wd_lst))) # one deg misalignment as initial guess to get out of local minimum at 0deg
 
-yaw = np.ones((13, len(wd_lst)))  
+yaw = np.ones((13, len(wd_lst)))  # Now 12 turbines
 
 def aep(yaw):
     return wfm.aep(wt_x, wt_y, yaw=yaw.reshape((13, len(wd_lst))), tilt=0, wd=wd_lst)
@@ -67,10 +72,19 @@ print(yaw_tabular)
 print(str(yaw_tabular.tolist()).replace(" ",""))
 
 
-yaw_tabular = np.array([
-    np.round(10 * np.sin(np.linspace(0, 2*np.pi, len(wd_lst))))  
-    for _ in range(13)
-], dtype=int)
+yaw_tabular=np.array([[0,0,-1,-2,-3,-2,2,3,2,1,0,-1,-3,-3,-6],
+                      [0,0,0,0,0,0,0,0,0,0,-1,-3,-5,-7,-5],
+                      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                      [0,0,0,0,0,0,0,0,0,0,-1,-3,-5,-3,-1],
+                      [0,0,0,-1,-3,-3,0,3,3,1,0,0,0,-1,-2],
+                      [0,0,0,-1,-2,-3,-2,2,3,2,0,-1,-3,-5,-7],
+                      [1,0,0,0,0,0,0,0,0,0,-1,-2,-4,-6,-7],
+                      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]])
 
 """
 for i, y_ in enumerate(yaw_tabular):
@@ -139,6 +153,6 @@ ani = animation.FuncAnimation(fig, update_plot, frames=1000, interval=100, blit=
 
 
 writer = FFMpegWriter(fps=10, metadata=dict(artist='DYNAMIKS User'), bitrate=1800)
-ani.save("Revolution_SouthFork_Wind_simulation_6.mp4", writer=writer, dpi=200)
+ani.save("Revolution_SouthFork_Wind_simulation_15.mp4", writer=writer, dpi=200)
 
 print('done')

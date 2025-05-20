@@ -16,8 +16,8 @@ UniformWeibullSite = xrsite.UniformWeibullSite
 current_directory = os.path.dirname(os.path.abspath(__file__))
 filepaths = [
     ("Revolution SouthFork Wind", 
-     os.path.join(current_directory, 'Layouts', 'Revolutionwind_southforkwind.geojson'),
-     os.path.join(current_directory, 'Layouts', 'Revolutionwind_southforkwind_TBL.geojson')),
+     os.path.join(current_directory, 'Layouts', 'Revolution_SouthFork_Wind_Boundary.geojson'),
+     os.path.join(current_directory, 'Layouts', 'Revolution_SouthFork_Wind_line_offshore.geojson')),
     ("Vineyard Wind",
      os.path.join(current_directory, 'Layouts', 'vineyardwind.geojson'),
      os.path.join(current_directory, 'Layouts', 'vineyardwind_TBL.geojson')),
@@ -73,14 +73,12 @@ plt.show()
 
 # === Wind Profile Extraction ===
 lib_filenames = {
-<<<<<<< HEAD:Project5_data_proces.py
-    "Revolution SouthFork Wind": "Revolution_SouthFork_Wind_wind_spped.lib"
-=======
+
     "Vineyard Wind": "vineyardwind_gwa3_gwc_customarea.lib",
     "Coastal Virginia": "coastalvirginia_gwa3_gwc_customarea.lib",
-    "Revolution SouthFork Wind": "revolutionwind_gwa3_gwc_customarea.lib",
+    "Revolution SouthFork Wind": "Revolution_SouthFork_Wind_wind_spped.lib",
     "Fecamp": "fecamp_gwa3_gwc_customarea.lib"
->>>>>>> 2893e108979051947dcba9e375056f3625df43eb:data_process.py
+
 }
 lib_paths = {name: os.path.join(current_directory, 'gwc', filename) for name, filename in lib_filenames.items()}
 
