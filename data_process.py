@@ -86,8 +86,8 @@ def extract_f_a_k(filepath):
     with open(filepath, 'r') as file:
         lines = file.readlines()
     f = [float(x) for x in lines[4].strip().split()]
-    a = [float(x) for x in lines[13].strip().split()]
-    k = [float(x) for x in lines[14].strip().split()]
+    a = [float(x) for x in lines[9].strip().split()]
+    k = [float(x) for x in lines[10].strip().split()]
     return f, a, k
 
 results_by_farm = {}
@@ -98,7 +98,7 @@ for name, _, _ in filepaths:
     wt_x, wt_y = layout_by_farm[name]
 
     class CustomSite(UniformWeibullSite):
-        def __init__(self, ti=.1, shear=PowerShear(h_ref=200, alpha=0.1)): 
+        def __init__(self, ti=.1, shear=PowerShear(h_ref=120, alpha=0.1)): 
             UniformWeibullSite.__init__(self, np.array(f)/np.sum(f), a, k, ti=ti, shear=shear)
             self.initial_position = np.array([wt_x, wt_y]).T
 
