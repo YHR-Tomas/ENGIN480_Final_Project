@@ -29,11 +29,7 @@ wfm = PropagateDownwind(UniformSite(ws=U, ti=TI), wt, NiayifarGaussianDeficit(),
                         deflectionModel=GCLHillDeflection(),
                         turbulenceModel=CrespoHernandez(),
                         rotorAvgModel=CGIRotorAvg(21))
-#wt_x = np.arange(3) * 5 * wt.diameter()
-#wt_y = wt_x * 0
 
-#wt_x = [0, 400, 800, 1200, 1600, 2000, 0, 400, 800, 1200, 1600, 2000]
-#wt_y = [0, 0, 0, 0, 0, 0, 400, 400, 400, 400, 400, 400]
 
 wt_x = np.array([316030.33, 316050.11, 316096.62, 317848.16, 319758.56, 317919.63, 
                  317889.61, 319720.91, 321553.09, 321652.26, 321627.03, 323416.21, 323440.36,])
@@ -42,9 +38,8 @@ wt_y = np.array([4549465.08, 4551316.05, 4553165.91, 4553188.73, 4553154.72, 455
 
 
 wd_lst = np.arange(195, 225,2)
-#yaw = np.ones((3, len(wd_lst))) # one deg misalignment as initial guess to get out of local minimum at 0deg
 
-yaw = np.ones((13, len(wd_lst)))  # Now 12 turbines
+yaw = np.ones((13, len(wd_lst)))  
 
 def aep(yaw):
     return wfm.aep(wt_x, wt_y, yaw=yaw.reshape((13, len(wd_lst))), tilt=0, wd=wd_lst)
